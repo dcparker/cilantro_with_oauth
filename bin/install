@@ -1,0 +1,59 @@
+#!/usr/bin/env ruby
+
+# File: bin/install
+# Purpose: Install system environment conducive to developing Cilantro applications.
+# Installs:
+#   1) ~/.bin to PATH (adds "export PATH=~/.bin:$PATH" to startup script and ensures directory exits)
+#   2) Copies bin/cilantro to /usr/local/bin/cilantro (if have sudo permission), and installs a script into ~/.bin that proxies to the current directory's bin/cilantro, or /usr/local/bin/cilantro, whichever exists first.
+#   3) Checks out cilantro to ~/.cilantro.git
+
+# Ensure that ~/.bin exists
+::Dir.mkdir "#{ENV['HOME']}/.bin" unless ::File.directory? "#{ENV['HOME']}/.bin"
+
+# Append the path through an export in your startup script file
+unless Regexp.new("#{ENV['HOME']}/.bin") === ENV['PATH']
+  profile = false
+  ["#{ENV['HOME']}/.bashrc", "#{ENV['HOME']}/.profile", "#{ENV['HOME']}/.bash_profile"].each do |file|
+    profile = file if ::File.exists? file
+  end
+  ::File.open(profile ||= "#{ENV['HOME']}/.bash_profile", 'a') do |f|
+    f << "export PATH=~/.bin:$PATH\n"
+  end
+  
+  puts "Installed ~/.bin to PATH (added export to #{profile})"
+end
+
+if `cp #{File.dirname(__FILE__)}/cilantro /usr/local/bin/`
+  # `cp #{File.dirname(__FILE__)}/cilantro #{ENV['HOME']}/.bin`
+  puts "Installed cilantro to /usr/local/bin"
+else
+  puts "Could not install cilantro into /usr/local/bin. Please run as root to do so. This is necessary for creating new cilantro projects."
+end
+
+
+open("#{ENV['HOME']}/.bin/cilantro", 'w') do |f|
+f << <<-END_PROXY_FILE
+#!/usr/bin/env ruby
+if File.exists?('bin/cilantro')
+  exec "bin/cilantro \#{ARGV.join(' ')}"
+else
+  puts "This project does not have a bin/cilantro installed!"
+  if File.exists?('/usr/local/bin/cilantro')
+    exec "/usr/local/bin/cilantro \#{ARGV.join(' ')}"
+  else
+    puts "Please install Cilantro to the system using `sudo bin/install' from within a cilantro project."
+  end
+end
+END_PROXY_FILE
+end
+`chmod +x "#{ENV['HOME']}/.bin/cilantro"`
+puts "Installed ~/.bin/cilantro."
+
+
+unless File.directory?("#{ENV['HOME']}/.cilantro.git")
+  Dir.chdir(ENV['HOME'])
+  `git clone git://github.com/dcparker/cilantro.git .cilantro-tmp`
+  `mv .cilantro-tmp/.git .cilantro.git`
+  `rm -rf .cilantro-tmp`
+  puts "Installed ~/.cilantro.git"
+end
