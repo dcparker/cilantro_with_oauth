@@ -21,6 +21,7 @@ require 'openssl'
 require 'base64'
 require 'cgi'
 dependency 'json'
+dependency 'oauth'
 
 
 ###################
