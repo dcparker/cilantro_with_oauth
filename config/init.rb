@@ -11,7 +11,7 @@
 ###################
 # Section: Options
 # Set your Cilantro options here.
-Cilantro.auto_reload = false
+Cilantro.auto_reload = true
 
 
 ###################
