@@ -1,4 +1,7 @@
 %h1 Authenticate with RemixWorld
 
 %p
-  %a{:href => url(:oauth_login)} Log in!
+  - if session[:access_token_token] && session[:access_token_secret]
+    %a{:href => url(:oauth_logout)} Log OUT!
+  - else
+    %a{:href => url(:oauth_login)} Log in!

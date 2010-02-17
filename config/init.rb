@@ -38,3 +38,14 @@ dependency 'dm-migrations'
 # Uncomment this to fire up a connection to the database using settings from config/database.yml config
 # It's configured for DataMapper by default, you can set up your own connection routine here instead.
 Cilantro.setup_database
+
+Cilantro.config[:OAuthConsumer] = OAuth::Consumer.new(
+  'nH7ue1Ky1XsQHjCzK0Wj',
+  'N5pSnQuYpWiCGSGZw4YSprnhxhrfzlkfUA9q89yO',
+  {
+    :site => 'http://rw.remix.local',
+    :request_token_path => '/api/oauth/request_token',
+    :authorize_path     => '/api/oauth/authorize',
+    :access_token_path  => '/api/oauth/access_token'
+  }
+)
